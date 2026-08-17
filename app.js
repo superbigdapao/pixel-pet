@@ -21,7 +21,7 @@ const labels = {painting:'画画', happy:'开心', sad:'难过', breathing:'呼�
 const durations = {painting:9000, happy:4300, sad:5000, breathing:6200, angry:4500, depressed:5200, smirk:4200};
 const idleWeights = [['breathing',48],['painting',20],['happy',10],['smirk',8],['sad',4],['depressed',10]];
 
-let activeLayer = 0, animationSeq = 0, dizzyUntil = 0, gazeFrame = 0, idleTimer = 0, bubbleTimer = 0;
+let activeLayer = 0, animationSeq = 0, dizzyUntil = 0, gazeFrame = 0, idleTimer = 0, bubbleTimer = 0, actionUntil = 0;
 let mouseState = {pending: null};
 let sideSwitches = 0, lastSide = 0, lastSwitchAt = 0, dizzyStage = 0;
 
@@ -56,6 +56,7 @@ function play(name='breathing', duration=0, options={}){
   next.src = `${ANIMATIONS[name]}?play=${seq}`;
   if (next.complete) reveal();
   const runFor = duration || durations[name] || 5000;
+  actionUntil = (name === 'breathing') ? 0 : performance.now() + runFor;
   if (interaction && name !== 'breathing') {
     clearTimeout(idleTimer);
     idleTimer = setTimeout(() => {
@@ -79,7 +80,7 @@ function applyGaze(event){
   petWrap.style.setProperty('--track-x', `${(nx*4).toFixed(1)}px`);
   petWrap.style.setProperty('--track-y', `${(ny*2).toFixed(1)}px`);
   petWrap.style.setProperty('--track-tilt', `${(nx*.85).toFixed(2)}deg`);
-  if (Math.abs(nx) > .24) petWrap.style.setProperty('--face-dir', nx > 0 ? '1' : '-1');
+  if (performance.now() >= actionUntil && Math.abs(nx) > .24) petWrap.style.setProperty('--face-dir', nx > 0 ? '1' : '-1');
 }
 function updateGaze(event){
   mouseState.pending = event;
