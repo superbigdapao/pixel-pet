@@ -18,7 +18,7 @@ const ANIMATIONS = {
 };
 
 const labels = {painting:'画画', happy:'开心', sad:'难过', breathing:'呼吸', angry:'生气', depressed:'郁闷', smirk:'坏笑'};
-const durations = {painting:9000, happy:4300, sad:5000, breathing:6200, angry:4500, depressed:5200, smirk:4200};
+const durations = {painting:4200, happy:2000, sad:3200, breathing:6200, angry:2700, depressed:3100, smirk:2800};
 const idleWeights = [['breathing',48],['painting',20],['happy',10],['smirk',8],['sad',4],['depressed',10]];
 
 let activeLayer = 0, animationSeq = 0, dizzyUntil = 0, gazeFrame = 0, idleTimer = 0, bubbleTimer = 0, actionUntil = 0;
@@ -120,7 +120,7 @@ Object.keys(ANIMATIONS).forEach(name => {
   actions.append(button);
 });
 play('breathing', 0, {interaction:false});
-petWrap.addEventListener('click', () => { play('happy', 3600); say('嘿嘿，摸到了！'); });
+petWrap.addEventListener('click', () => { play('happy', durations.happy); say('嘿嘿，摸到了！'); });
 document.addEventListener('mousemove', updateGaze, {passive:true});
 room.addEventListener('mouseleave', () => {
   petWrap.style.setProperty('--track-x','0px');
