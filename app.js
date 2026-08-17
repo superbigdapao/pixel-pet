@@ -78,7 +78,7 @@ function applyGaze(event){
   petWrap.style.setProperty('--track-x', `${(nx*4).toFixed(1)}px`);
   petWrap.style.setProperty('--track-y', `${(ny*2).toFixed(1)}px`);
   petWrap.style.setProperty('--track-tilt', `${(nx*.85).toFixed(2)}deg`);
-  if (Math.abs(nx) > .24) petWrap.style.setProperty('--face-dir', nx > 0 ? '-1' : '1');
+  if (Math.abs(nx) > .24) petWrap.style.setProperty('--face-dir', nx > 0 ? '1' : '-1');
 }
 function updateGaze(event){
   const now = performance.now(), dt = Math.max(now - mouseState.t, 1);
