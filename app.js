@@ -15,10 +15,11 @@ const ANIMATIONS = {
   angry: 'pet-assets/angry/pet_angry.gif',
   depressed: 'pet-assets/depressed/pet_depressed.gif',
   smirk: 'pet-assets/smirk/pet_smirk.gif',
+  walking: 'pet-assets/walking/pet_walking.gif',
 };
 
-const labels = {painting:'画画', happy:'开心', sad:'难过', breathing:'呼吸', angry:'生气', depressed:'郁闷', smirk:'坏笑'};
-const durations = {painting:4200, happy:2000, sad:3200, breathing:6200, angry:2700, depressed:3100, smirk:2800};
+const labels = {painting:'画画', happy:'开心', sad:'难过', breathing:'呼吸', angry:'生气', depressed:'郁闷', smirk:'坏笑', walking:'行走'};
+const durations = {painting:4200, happy:2000, sad:3200, breathing:6200, angry:2700, depressed:3100, smirk:2800, walking:2200};
 const idleWeights = [['breathing',48],['painting',20],['happy',10],['smirk',8],['sad',4],['depressed',10]];
 
 let activeLayer = 0, animationSeq = 0, dizzyUntil = 0, gazeFrame = 0, idleTimer = 0, bubbleTimer = 0, actionUntil = 0;
