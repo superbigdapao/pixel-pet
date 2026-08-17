@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Paltrow 像素小屋 · 动画演示</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>.solo{width:min(680px,100%)}</style>
+</head>
+<body>
+  <section class="stage-card solo">
+    <div class="status"><span></span><span id="statusText">动画演示（未接入模型）</span></div>
+    <div id="room" class="room">
+      <div class="window"><i></i><i></i><i></i><i></i></div>
+      <div id="petWrap" class="pet-wrap" title="摸摸她">
+        <img id="petA" class="pet pet-layer active" alt="Paltrow pixel pet">
+        <img id="petB" class="pet pet-layer" alt="" aria-hidden="true">
+        <div class="dizzy-stars"><b>✦</b><b>✧</b><b>✦</b></div>
+      </div>
+      <div id="bubble" class="bubble">我在这里呀</div>
+      <div class="floor"></div>
+    </div>
+    <div id="actions" class="actions"></div>
+  </section>
+  <script src="app.js"></script>
+</body>
+</html>
