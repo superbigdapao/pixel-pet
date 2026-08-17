@@ -22,7 +22,8 @@ const durations = {painting:9000, happy:4300, sad:5000, breathing:6200, angry:45
 const idleWeights = [['breathing',48],['painting',20],['happy',10],['smirk',8],['sad',4],['depressed',10]];
 
 let activeLayer = 0, animationSeq = 0, dizzyUntil = 0, gazeFrame = 0, idleTimer = 0, bubbleTimer = 0;
-let mouseState = {x:0, y:0, t:performance.now(), fastHits:0, lastFast:0, pending:null};
+let mouseState = {pending: null};
+let sideSwitches = 0, lastSide = 0, lastSwitchAt = 0, dizzyStage = 0;
 
 function weightedIdle(){
   const total = idleWeights.reduce((sum, item) => sum + item[1], 0);
@@ -81,21 +82,28 @@ function applyGaze(event){
   if (Math.abs(nx) > .24) petWrap.style.setProperty('--face-dir', nx > 0 ? '1' : '-1');
 }
 function updateGaze(event){
-  const now = performance.now(), dt = Math.max(now - mouseState.t, 1);
-  const dx = event.clientX - mouseState.x, dy = event.clientY - mouseState.y;
-  const distance = Math.hypot(dx, dy), speed = distance / dt;
   mouseState.pending = event;
   if (!gazeFrame) gazeFrame = requestAnimationFrame(() => applyGaze(mouseState.pending));
-  if (speed > 1.7 && distance > 45){
-    mouseState.fastHits = now - mouseState.lastFast < 480 ? mouseState.fastHits + 1 : 1;
-    mouseState.lastFast = now;
-    if (mouseState.fastHits >= 3 && now > dizzyUntil) triggerDizzy();
-  }
-  mouseState = {...mouseState, x:event.clientX, y:event.clientY, t:now};
+  detectSideSwitch(event.clientX);
 }
-function triggerDizzy(){
-  dizzyUntil = performance.now() + 2800; mouseState.fastHits = 0; petWrap.classList.add('dizzy');
-  play('depressed', 3000); say('等、等一下……有点晕了 @_@');
+function detectSideSwitch(clientX){
+  const now = performance.now();
+  if (now < dizzyUntil) return;
+  const rect = petWrap.getBoundingClientRect();
+  const side = clientX > rect.left + rect.width / 2 ? 1 : -1;
+  if (lastSide === 0) { lastSide = side; return; }
+  if (side === lastSide) return;
+  if (now - lastSwitchAt > 600) sideSwitches = 0;
+  lastSide = side; lastSwitchAt = now; sideSwitches++;
+  if (sideSwitches >= 10){
+    if (dizzyStage === 0){ triggerDizzy('depressed', '等、等一下……有点晕了 @_@'); dizzyStage = 1; }
+    else triggerDizzy('angry', '别、别晃了！我真的生气了！');
+    sideSwitches = 0;
+  }
+}
+function triggerDizzy(anim, msg){
+  dizzyUntil = performance.now() + 2800; petWrap.classList.add('dizzy');
+  play(anim, 3000); say(msg);
   setTimeout(() => {
     petWrap.classList.remove('dizzy');
     if (performance.now() >= dizzyUntil) play('breathing', 0, {interaction:false});
