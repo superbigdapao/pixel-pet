@@ -16,13 +16,14 @@ const ANIMATIONS = {
   depressed: 'pet-assets/depressed/pet_depressed.gif',
   smirk: 'pet-assets/smirk/pet_smirk.gif',
   walking: 'pet-assets/walking/pet_walking.gif',
+  walking_left: 'pet-assets/walking/pet_walking_left.gif',
 };
 
 const labels = {painting:'画画', happy:'开心', sad:'难过', breathing:'呼吸', angry:'生气', depressed:'郁闷', smirk:'坏笑', walking:'行走'};
-const durations = {painting:4200, happy:2000, sad:3200, breathing:6200, angry:2700, depressed:3100, smirk:2800, walking:2200};
-const idleWeights = [['breathing',48],['painting',20],['happy',10],['smirk',8],['sad',4],['depressed',10]];
+const durations = {painting:4200, happy:2000, sad:3200, breathing:6200, angry:2700, depressed:3100, smirk:2800, walking:2400};
+const idleWeights = [['breathing',48],['painting',20],['happy',10],['smirk',8],['sad',4],['depressed',10],['walking',8]];
 
-let activeLayer = 0, animationSeq = 0, dizzyUntil = 0, gazeFrame = 0, idleTimer = 0, bubbleTimer = 0, actionUntil = 0;
+let activeLayer = 0, animationSeq = 0, dizzyUntil = 0, gazeFrame = 0, idleTimer = 0, bubbleTimer = 0, actionUntil = 0, walkX = 0, walkMoveId = 0;
 let mouseState = {pending: null};
 let sideSwitches = 0, lastSide = 0, lastSwitchAt = 0, dizzyStage = 0;
 
@@ -40,6 +41,11 @@ function scheduleChain(delay, seq){
   }, delay);
 }
 function play(name='breathing', duration=0, options={}){
+  if (name === 'walking') { startWalk(options); return; }
+  playCore(name, duration, options);
+}
+function playCore(name='breathing', duration=0, options={}){
+  cancelAnimationFrame(walkMoveId);
   if (!ANIMATIONS[name]) name = 'breathing';
   if (!ANIMATIONS[name]) return;
   const interaction = options.interaction !== false;
@@ -64,6 +70,43 @@ function play(name='breathing', duration=0, options={}){
       if (seq === animationSeq && performance.now() >= dizzyUntil) play('breathing', 0, {interaction:false});
     }, runFor);
   } else scheduleChain(runFor, seq);
+}
+function walkBounds(){
+  const roomW = room.clientWidth || 600;
+  const petW = petWrap.offsetWidth || 450;
+  return Math.max(0, (roomW - petW) / 2 - 8);
+}
+function startWalk(options={}){
+  const bound = walkBounds();
+  let dir;
+  if (walkX > bound * 0.6) dir = -1;
+  else if (walkX < -bound * 0.6) dir = 1;
+  else dir = Math.random() < 0.5 ? -1 : 1;
+  const concrete = dir === 1 ? 'walking' : 'walking_left';
+  const dur = durations.walking || 2400;
+  petWrap.style.setProperty('--face-dir', '1');
+  playCore(concrete, dur, options);
+  moveDuringWalk(dir, dur);
+}
+function moveDuringWalk(dir, dur){
+  const bound = walkBounds();
+  const dist = 60 + Math.random() * 80;
+  let target = walkX + dir * dist;
+  target = Math.max(-bound, Math.min(bound, target));
+  const startX = walkX;
+  const start = performance.now();
+  cancelAnimationFrame(walkMoveId);
+  const prevTransition = petWrap.style.transition;
+  petWrap.style.transition = 'none';
+  const step = now => {
+    const t = Math.min(1, (now - start) / dur);
+    const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    walkX = startX + (target - startX) * e;
+    petWrap.style.setProperty('--walk-x', `${walkX.toFixed(1)}px`);
+    if (t < 1) walkMoveId = requestAnimationFrame(step);
+    else petWrap.style.transition = prevTransition;
+  };
+  walkMoveId = requestAnimationFrame(step);
 }
 
 function say(text){
@@ -114,6 +157,7 @@ function triggerDizzy(anim, msg){
 
 // 初始化：动作按钮 + 待机呼吸
 Object.keys(ANIMATIONS).forEach(name => {
+  if (name === 'walking_left') return;
   const button = document.createElement('button');
   button.type = 'button';
   button.textContent = labels[name] || name;
